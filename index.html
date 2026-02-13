@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>For You ❤️</title>
+    <style>
+        /* Base Setup & Background */
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            /* Make sure your background image is named exactly background.jpg */
+            background-image: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            background-color: #000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        /* --- Floating Hearts Vibe --- */
+        #hearts-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none; /* Crucial: Lets her click the start button through the hearts */
+            z-index: 1; /* Sits below the start screen and media, but above background */
+            overflow: hidden;
+        }
+
+        .heart {
+            position: absolute;
+            bottom: -10%; /* Starts just off the bottom of the screen */
+            opacity: 0.8;
+            animation: floatUp 5s ease-in infinite, sway 3s ease-in-out infinite alternate;
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0); opacity: 0; }
+            10% { opacity: 0.8; }
+            90% { opacity: 0.8; }
+            100% { transform: translateY(-120vh); opacity: 0; }
+        }
+
+        @keyframes sway {
+            0% { margin-left: -15px; }
+            100% { margin-left: 15px; }
+        }
+
+        /* The Start Screen */
+        #start-screen {
+            position: absolute;
+            z-index: 10;
+            color: white;
+            text-align: center;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            transition: opacity 1s ease;
+            width: 100%;
+            height: 100%;
+            justify-content: center;
+            background: rgba(0,0,0,0.5); /* Slight darkening before start */
+        }
+
+        #start-btn {
+            background: rgba(255, 255, 255, 0.2);
+            border: 2px solid white;
+            padding: 15px 40px;
+            color: white;
+            font-size: 1.5rem;
+            border-radius: 30px;
+            backdrop-filter: blur(5px);
+            margin-top: 20px;
+            transition: background 0.3s;
+            pointer-events: auto; /* Ensures button is clickable */
+        }
+
+        #start-btn:hover {
+            background: rgba(255, 255, 255, 0.4);
+        }
+
+        /* The Media Elements - BULLETPROOF CENTERING */
+        #media-wrapper {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            z-index: 5;
+        }
+
+        .media-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 1.5s ease-in-out;
+        }
+
+        .media-container.active {
+            opacity: 1;
+        }
+
+        img, video {
+            max-width: 90vw;
+            max-height: 65vh;
+            object-fit: contain;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+
+        /* The Slide Messages */
+        #message-overlay {
+            position: absolute;
+            bottom: 8%;
+            width: 90%;
+            left: 5%;
+            text-align: center;
+            color: white;
+            font-size: 1.8rem;
+            font-weight: 500;
+            text-shadow: 2px 2px 10px rgba(0,0,0,0.9);
+            opacity: 0;
+            transform: translateY(20px);
+            transition: opacity 1.5s ease, transform 1.5s ease;
+            z-index: 6;
+        }
+
+        #message-overlay.show-text {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* Grand Finale Styles */
+        #finale-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 20;
+            opacity: 0;
+            transition: opacity 3s ease-in-out;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        #finale-screen.active {
+            opacity: 1;
+        }
+
+        .letter-content {
+            max-width: 650px;
+            text-align: center;
+            line-height: 1.8;
+            font-size: 1.15rem;
+            text-shadow: 2px 2px 8px rgba(0,0,0,0.8);
+        }
+        
+        .letter-content p {
+            margin-bottom: 18px;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="hearts-container"></div>
+
+    <div id="start-screen">
+        <h2>I have something for you...</h2>
+        <div id="start-btn">Tap to Open ❤️</div>
+    </div>
+
+    <audio id="bg-music" loop>
+        <source src="our-song.mp3" type="audio/mpeg">
+    </audio>
+
+    <div id="media-wrapper">
+        <div id="image-container" class="media-container hidden">
+            <img id="main-image" src="" alt="Memory">
+        </div>
+        <div id="video-container" class="media-container hidden">
+            <video id="main-video" src="" playsinline muted></video>
+        </div>
+    </div>
+
+    <div id="message-overlay"></div>
+
+    <div id="finale-screen" class="hidden">
+        <div class="letter-content">
+            <p><strong>My perfection ❤️</strong></p>
+            <p>This is just to appreciate you for who you are.</p>
+            <p>You have such a beautiful heart. The way you care, the way you show up, the way you give your love so naturally — it’s something truly special. Your kindness doesn’t go unnoticed. Your patience doesn’t go unnoticed. Your effort doesn’t go unnoticed.</p>
+            <p>You bring warmth into every space you enter. There’s a softness and strength in you at the same time, and it’s rare. The way you love is genuine, intentional, and pure.</p>
+            <p>You mean more than words can properly explain. Your presence alone makes life better, brighter, and more meaningful. Having you in my life is a gift I don’t take lightly.</p>
+            <p>I love you deeply, honestly, and completely. Not just for what you do, but for who you are at your core.</p>
+            <p>You are valued.<br>You are cherished.<br>You are deeply appreciated.</p>
+            <p>And you are loved more than you know. ❤️</p>
+        </div>
+    </div>
+
+    <script>
+        // --- Floating Hearts Logic ---
+        function createHeart() {
+            const heartContainer = document.getElementById('hearts-container');
+            const heart = document.createElement('div');
+            heart.classList.add('heart');
+            
+            // Mix of emojis for a better vibe
+            const emojis = ['❤️', '💖', '💕', '✨'];
+            heart.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            // Randomize where it starts left-to-right
+            heart.style.left = Math.random() * 100 + 'vw';
+            
+            // Randomize the size (between 1rem and 2.5rem)
+            heart.style.fontSize = (Math.random() * 1.5 + 1) + 'rem';
+            
+            // Randomize how fast it floats up (between 4 and 7 seconds)
+            heart.style.animationDuration = (Math.random() * 3 + 4) + 's'; 
+            
+            heartContainer.appendChild(heart);
+            
+            // Clean up: remove the heart after 7 seconds so the browser doesn't crash
+            setTimeout(() => {
+                heart.remove();
+            }, 7000);
+        }
+
+        // Create a new heart every 400 milliseconds!
+        setInterval(createHeart, 400);
+
+        // --- YOUR MEMORIES ---
+        // Change photo1.jpg, video1.mp4, etc. to your exact file names!
+        const memories = [
+            { type: 'img', src: 'photo1.jpg', text: 'Every moment with you...' },
+            { type: 'vid', src: 'video2.mp4', text: 'Is a moment I cherish.' },
+            { type: 'vid', src: 'video1.mp4', text: 'I love making memories with you.' },
+            { type: 'vid', src: 'video3.mp4', text: 'Happy Valentine’s Day.' }
+        ];
+
+        let currentIndex = 0;
+        const startScreen = document.getElementById('start-screen');
+        const bgMusic = document.getElementById('bg-music');
+        const imgContainer = document.getElementById('image-container');
+        const vidContainer = document.getElementById('video-container');
+        const mainImage = document.getElementById('main-image');
+        const mainVideo = document.getElementById('main-video');
+        const messageOverlay = document.getElementById('message-overlay');
+        const finaleScreen = document.getElementById('finale-screen');
+
+        // Start the journey when tapped
+        startScreen.addEventListener('click', () => {
+            startScreen.style.opacity = '0';
+            
+            // Start the music
+            bgMusic.volume = 0.5;
+            bgMusic.play();
+
+            setTimeout(() => {
+                startScreen.classList.add('hidden');
+                playNextMemory();
+            }, 1000); // Wait for fade out
+        });
+
+        function playNextMemory() {
+            // Check if we reached the end
+            if (currentIndex >= memories.length) {
+                // Show the Grand Finale Letter
+                finaleScreen.classList.remove('hidden');
+                setTimeout(() => {
+                    finaleScreen.classList.add('active');
+                }, 100);
+                
+                // Keep the music playing, but fade out the last slide's text
+                messageOverlay.classList.remove('show-text');
+                return;
+            }
+
+            const memory = memories[currentIndex];
+            messageOverlay.classList.remove('show-text'); // Hide old text
+
+            setTimeout(() => {
+                messageOverlay.innerText = memory.text; // Set new text
+                
+                if (memory.type === 'img') {
+                    // Handle Image
+                    vidContainer.classList.remove('active');
+                    setTimeout(() => vidContainer.classList.add('hidden'), 1500);
+
+                    mainImage.src = memory.src;
+                    imgContainer.classList.remove('hidden');
+                    setTimeout(() => imgContainer.classList.add('active'), 50);
+
+                    // Show text
+                    setTimeout(() => messageOverlay.classList.add('show-text'), 500);
+
+                    // Move to next slide after 5 seconds
+                    currentIndex++;
+                    setTimeout(playNextMemory, 5000); 
+
+                } else if (memory.type === 'vid') {
+                    // Handle Video
+                    imgContainer.classList.remove('active');
+                    setTimeout(() => imgContainer.classList.add('hidden'), 1500);
+
+                    mainVideo.src = memory.src;
+                    mainVideo.load(); // Forces browser to load the new video
+
+                    vidContainer.classList.remove('hidden');
+                    setTimeout(() => vidContainer.classList.add('active'), 50);
+                    
+                    // Force play logic to bypass phone blockers
+                    let playPromise = mainVideo.play();
+                    if (playPromise !== undefined) {
+                        playPromise.catch(error => {
+                            console.log("Autoplay prevented:", error);
+                        });
+                    }
+
+                    // Show text
+                    setTimeout(() => messageOverlay.classList.add('show-text'), 500);
+
+                    // Move to next slide ONLY when the video finishes playing
+                    mainVideo.onended = () => {
+                        currentIndex++;
+                        playNextMemory();
+                    };
+                }
+            }, 1000); // Transition buffer between slides
+        }
+    </script>
+</body>
+</html>
